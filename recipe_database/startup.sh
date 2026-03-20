@@ -142,6 +142,18 @@ export POSTGRES_DB="${DB_NAME}"
 export POSTGRES_PORT="${DB_PORT}"
 EOF
 
+# Apply application schema and seed data through the canonical bootstrap flow
+if [ -f "bootstrap.sql" ]; then
+    echo "Applying SmartRecipe database bootstrap..."
+    sudo -u postgres ${PG_BIN}/psql -p ${DB_PORT} -d ${DB_NAME} -f bootstrap.sql
+    BOOTSTRAP_EXIT_CODE=$?
+    if [ ${BOOTSTRAP_EXIT_CODE} -ne 0 ]; then
+        echo "Bootstrap failed with exit code ${BOOTSTRAP_EXIT_CODE}"
+        exit ${BOOTSTRAP_EXIT_CODE}
+    fi
+    echo "Bootstrap completed successfully."
+fi
+
 echo "PostgreSQL setup complete!"
 echo "Database: ${DB_NAME}"
 echo "User: ${DB_USER}"
